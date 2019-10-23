@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
@@ -9,7 +13,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="522.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MainScreenController">
+<AnchorPane id="AnchorPane" prefHeight="522.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MainScreenController">
    <children>
       <Label fx:id="lblMainLabel" layoutX="29.0" layoutY="32.0" text="Inventory Management System">
          <font>
@@ -23,7 +27,7 @@
                   <Font name="Calibri Bold" size="24.0" />
                </font>
             </Label>
-            <Button fx:id="btnSearchPart" layoutX="218.0" layoutY="21.0" mnemonicParsing="false" onAction="#searchPartHandler" text="Search" />
+            <Button fx:id="btnSearchPart" layoutX="215.0" layoutY="24.0" mnemonicParsing="false" onAction="#searchPartHandler" text="Search" />
             <TextField fx:id="txtPartSearch" layoutX="292.0" layoutY="21.0" prefHeight="31.0" prefWidth="195.0">
                <font>
                   <Font name="Calibri Light" size="15.0" />
@@ -49,7 +53,7 @@
                   <Font name="Calibri Bold" size="24.0" />
                </font>
             </Label>
-            <Button fx:id="btnSearchProduct" layoutX="218.0" layoutY="21.0" mnemonicParsing="false" onAction="#searchProductHandler" text="Search" />
+            <Button fx:id="btnSearchProduct" layoutX="216.0" layoutY="24.0" mnemonicParsing="false" onAction="#searchProductHandler" text="Search" />
             <TextField fx:id="txtSearchProduct" layoutX="292.0" layoutY="21.0" prefHeight="31.0" prefWidth="195.0">
                <font>
                   <Font name="Calibri Light" size="15.0" />
