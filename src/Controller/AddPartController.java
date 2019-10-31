@@ -5,6 +5,10 @@
  */
 package Controller;
 
+import Model.InHouse;
+import Model.Inventory;
+import Model.Outsourced;
+import Model.Part;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
@@ -76,9 +80,7 @@ public class AddPartController implements Initializable {
         // TODO
     showMachineID = this.radBtnInHouse.isSelected();
     showCompanyName = this.radBtnOutsourced.isSelected();
-    
-    System.out.println(showMachineID);
-    System.out.println(showCompanyName);
+
     
         initStateToggleSource();
     }    
@@ -112,8 +114,31 @@ public class AddPartController implements Initializable {
 
     @FXML
     private void btnActionSave(ActionEvent event) throws IOException {
-        
+        Part part;
         // TODO: save entry
+        int partID = Inventory.getAllParts().size() + 1; // ensure part number minimum value is 1
+        String partName = this.getTxtName();
+        double partPrice = this.getTxtPrice();
+        int partStock = this.getTxtInv();
+        int partMin = this.getTxtMin();
+        int partMax = this.getTxtMax();
+        String partCompanyName = this.getTxtCompanyName();
+        int partMachineID = this.getTxtMachineID();
+       
+        if(this.showMachineID){
+            part = new Outsourced(partID, partName, partPrice, partStock, partMin, partMax, partCompanyName);
+            
+            // add new Outsourced Part to Inventory
+            Inventory.addPart(part);
+        }else{
+            part = new InHouse(partID, partName, partPrice, partStock, partMin, partMax, partMachineID);
+            
+            // add new InHouse Part to Inventory
+            Inventory.addPart(part);
+        }
+        
+        System.out.println("Part added");
+        System.out.println(part);
         
         // Load Main Screen on save
         
@@ -156,36 +181,51 @@ public class AddPartController implements Initializable {
     /**
      * @return the txtName
      */
-    public TextField getTxtName() {
-        return txtName;
+    public String getTxtName() {
+        return txtName.getText();
     }
 
     /**
      * @return the txtInv
      */
-    public TextField getTxtInv() {
-        return txtInv;
+    public int getTxtInv() {
+        return Integer.parseInt(txtInv.getText());
     }
 
     /**
      * @return the txtPrice
      */
-    public TextField getTxtPrice() {
-        return txtPrice;
+    public double getTxtPrice() {
+        String priceString = txtPrice.getText();
+        return Double.parseDouble(priceString);
     }
 
     /**
      * @return the txtMax
      */
-    public TextField getTxtMax() {
-        return txtMax;
+    public int getTxtMax() {
+        return Integer.parseInt(txtMax.getText());
     }
 
     /**
      * @return the txtMin
      */
-    public TextField getTxtMin() {
-        return txtMin;
+    public int getTxtMin() {
+        return Integer.parseInt(txtMin.getText());
+    }
+
+    /**
+     * @return the txtMachineID
+     */
+    public int getTxtMachineID() {
+        return Integer.parseInt(txtMachineID.getText());
+    }
+
+    /**
+     * @return the txtCompanyName
+     */
+    public String getTxtCompanyName() {
+        return txtCompanyName.getText();
     }
     
 }
