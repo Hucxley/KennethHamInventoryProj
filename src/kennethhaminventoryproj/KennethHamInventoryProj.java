@@ -5,6 +5,7 @@
  */
 package kennethhaminventoryproj;
 
+import Model.Inventory;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import static javafx.fxml.FXMLLoader.load;
@@ -20,6 +21,7 @@ public class KennethHamInventoryProj extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
+        
         Parent root = FXMLLoader.load(getClass().getResource("/View/MainScreen.fxml"));
         
         Scene scene = new Scene(root);
@@ -34,5 +36,7 @@ public class KennethHamInventoryProj extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+    
+
     
 }

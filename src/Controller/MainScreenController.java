@@ -5,15 +5,13 @@
  */
 package Controller;
 
-import Model.InHouse;
 import Model.Inventory;
 import Model.Part;
+import Model.Product;
+import com.sun.glass.ui.Application;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -88,12 +86,15 @@ public class MainScreenController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
+        System.out.println(Inventory.getAllParts().size());
+        
     }    
 
     @FXML
     private void searchPartHandler(ActionEvent event) {
         
-        String searchText = txtPartSearch.getText();
+        String searchText;
+        searchText = txtPartSearch.getText();
         
         // Regex pattern for matches from Stack Overflow user tokhi
         // URL to source: https://stackoverflow.com/a/39531087
@@ -147,6 +148,33 @@ public class MainScreenController implements Initializable {
 
     @FXML
     private void searchProductHandler(ActionEvent event) {
+        
+        String searchText;
+        searchText = txtSearchProduct.getText();
+        
+        // Regex pattern for matches from Stack Overflow user tokhi
+        // URL to source: https://stackoverflow.com/a/39531087
+        Boolean isNumber = searchText.matches("^[0-9]*$");
+        // If searchText is a number, search parts by index
+        if(isNumber){
+            int productId = Integer.parseInt(searchText);
+            
+            // Ensure partId is not 0 and is not greater than length of parts list
+            if(productId != 0 && productId <= Inventory.getAllProducts().size()){
+                Product foundProduct = Inventory.lookupProduct(productId);
+                
+                // TODO: display search results
+                
+                System.out.println(foundProduct);
+            } else {  // notify user to enter valid part ID
+                
+                // TODO: create notifcation / dialogue for invalid part ID
+                
+                System.out.println("TODO; Dialog for invalid part ID");
+            }
+        } else { // if searchText is not a numbger, search parts list with string
+            System.out.println(txtPartSearch.getText());
+        }
         
 
     }

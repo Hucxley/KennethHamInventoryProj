@@ -34,7 +34,8 @@ public class Inventory {
         
     }
     
-    public static void lookupProduct(int productID){ // TODO: change void to Product
+    public static Product lookupProduct(int productID){ // TODO: change void to Product
+        return allProducts.get(productID - 1); // convert to 0-based index
         
     }
     
