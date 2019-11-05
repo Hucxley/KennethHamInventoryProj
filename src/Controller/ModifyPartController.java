@@ -5,17 +5,26 @@
  */
 package Controller;
 
+import Model.InHouse;
+import Model.Inventory;
+import Model.Outsourced;
+import Model.Part;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import static javafx.collections.FXCollections.observableArrayList;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
@@ -33,11 +42,11 @@ public class ModifyPartController implements Initializable {
     Parent scene;
     Boolean showMachineID;
     Boolean showCompanyName;
-
-    @FXML
-    private RadioButton radBtnInHouse;
+    
     @FXML
     private ToggleGroup toggleGroupPartSource;
+    @FXML
+    private RadioButton radBtnInHouse;
     @FXML
     private RadioButton radBtnOutsourced;
     @FXML
@@ -81,7 +90,32 @@ public class ModifyPartController implements Initializable {
         
         initStateToggleSource();
         
-    }    
+    }
+
+    public void setPartToModify(Part part){
+        txtID.setText(String.valueOf(part.getId()));
+        txtName.setText(part.getName());
+        txtPrice.setText(String.valueOf(part.getPrice()));
+        txtMax.setText(String.valueOf(part.getMax()));
+        txtMin.setText(String.valueOf(part.getMin()));
+        txtInv.setText(String.valueOf(part.getStock()));
+        if(part instanceof InHouse){
+            this.showCompanyName = false;
+            this.showMachineID = true;
+            radBtnInHouse.setSelected(true);
+            radBtnOutsourced.setSelected(false);
+            txtMachineID.setText(String.valueOf(((InHouse) part).getMachineId()));
+            toggleInternalExternalFields();
+            
+        }else{
+            this.showMachineID = false;
+            this.showCompanyName = true;
+            radBtnOutsourced.setSelected(true);
+            radBtnInHouse.setSelected(false);
+            txtCompanyName.setText(((Outsourced) part).getCompanyName());
+            toggleInternalExternalFields();
+        }
+    }
 
     @FXML
     private void togglePartSource(ActionEvent event) {
@@ -110,7 +144,55 @@ public class ModifyPartController implements Initializable {
     @FXML
     private void btnActionSave(ActionEvent event) throws IOException {
         // TODO: save entry
+        Integer idToUpdate = Integer.parseInt(txtID.getText());
+        Part partToUpdate = Inventory.lookupPart(idToUpdate);
+        System.out.println(partToUpdate);
+        Integer partIndex = Inventory.getAllParts().indexOf(partToUpdate);
+        partToUpdate.setId(Integer.parseInt(txtID.getText()));
+        partToUpdate.setMax(Integer.parseInt(txtMax.getText()));
+        partToUpdate.setMin(Integer.parseInt(txtMin.getText()));
+        partToUpdate.setName(txtName.getText());
+        partToUpdate.setStock(Integer.parseInt(txtInv.getText()));
+        partToUpdate.setPrice(Double.parseDouble(txtPrice.getText()));
         
+        if(this.showMachineID){
+            try{
+                ((InHouse) partToUpdate).setMachineId(Integer.parseInt(txtMachineID.getText()));
+            }catch(ClassCastException e){
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Error in Part Update");
+                errorAlert.setHeaderText("Part Source Can Not Be Changed");
+                errorAlert.setContentText("To change a part's source, a new entry must be completed for the new part source and the old part source must be deleted.");
+
+                Optional<ButtonType> response = errorAlert.showAndWait();
+                    if(response.get() == ButtonType.OK){
+                       // do nothing
+
+                }
+            }            
+        }
+        if(this.showCompanyName){
+            try{
+                ((Outsourced) partToUpdate).setCompanyName(txtCompanyName.getText());
+            }catch(ClassCastException e){
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Error in Part Update");
+                errorAlert.setHeaderText("Part Source Can Not Be Changed");
+                errorAlert.setContentText("To change a part's source, a new entry must be completed for the new part source and the old part source must be deleted.");
+
+                Optional<ButtonType> response = errorAlert.showAndWait();
+                    if(response.get() == ButtonType.OK){
+                       // do nothing
+
+                }
+            }  
+        }
+        
+        
+        Inventory.updatePart(partIndex, partToUpdate);
+        
+        
+                      
         // Load Main Screen on save
         
         stage = (Stage)((Button)event.getSource()).getScene().getWindow();
@@ -121,7 +203,6 @@ public class ModifyPartController implements Initializable {
     }
     
     private void initStateToggleSource(){
-        System.out.println("initStatePartSource called");
         if(Objects.equals(this.showMachineID, this.showCompanyName)){
             System.out.println("there's a problem, in-house & outsourced are the same!");
         }else{

@@ -23,6 +23,7 @@ public class Product {
 
     /**
      * 
+     * @param associatedParts
      * @param id id of product
      * @param name Product name
      * @param price Product price

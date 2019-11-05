@@ -8,20 +8,26 @@ package Controller;
 import Model.Inventory;
 import Model.Part;
 import Model.Product;
-import com.sun.glass.ui.Application;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 /**
@@ -33,8 +39,7 @@ public class MainScreenController implements Initializable {
     
     Stage stage;
     Parent scene;
-    Inventory inventory = new Inventory();
-
+    
     @FXML
     private Label lblMainLabel;
     @FXML
@@ -44,13 +49,15 @@ public class MainScreenController implements Initializable {
     @FXML
     private TextField txtPartSearch;
     @FXML
-    private TableColumn<?, ?> colPartId;
+    private TableView<Part> tablePartsList;
     @FXML
-    private TableColumn<?, ?> colPartName;
+    private TableColumn<Part, Integer> colPartId;
     @FXML
-    private TableColumn<?, ?> colPartCount;
+    private TableColumn<Part, String> colPartName;
     @FXML
-    private TableColumn<?, ?> colPartPrice;
+    private TableColumn<Part, Integer> colPartCount;
+    @FXML
+    private TableColumn<Part, Double> colPartPrice;
     @FXML
     private Button btnDeletePart;
     @FXML
@@ -64,13 +71,15 @@ public class MainScreenController implements Initializable {
     @FXML
     private TextField txtSearchProduct;
     @FXML
-    private TableColumn<?, ?> colProductId;
+    private TableView<Product> tableProductsList;
     @FXML
-    private TableColumn<?, ?> colProductName;
+    private TableColumn<Product, Integer> colProductId;
     @FXML
-    private TableColumn<?, ?> colProductCount;
+    private TableColumn<Product, String> colProductName;
     @FXML
-    private TableColumn<?, ?> colProductPrice;
+    private TableColumn<Product, Integer> colProductCount;
+    @FXML
+    private TableColumn<Product, Double> colProductPrice;
     @FXML
     private Button btnDeleteProduct;
     @FXML
@@ -80,13 +89,26 @@ public class MainScreenController implements Initializable {
     @FXML
     private Button btnExit;
 
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-        System.out.println(Inventory.getAllParts().size());
+        System.out.println( Inventory.getAllParts().size());
+        
+        tablePartsList.setItems(Inventory.getAllParts());
+        colPartId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colPartName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colPartCount.setCellValueFactory(new PropertyValueFactory<>("stock"));
+        colPartPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
+        
+        tableProductsList.setItems(Inventory.getAllProducts());
+        colProductId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colProductName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colProductCount.setCellValueFactory(new PropertyValueFactory<>("stock"));
+        colProductPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
         
     }    
 
@@ -105,6 +127,7 @@ public class MainScreenController implements Initializable {
             
             // Ensure partId is not 0 and is not greater than length of parts list
             if(partId != 0 && partId <= Inventory.getAllParts().size()){
+
                 Part foundPart = Inventory.lookupPart(partId);
                 
                 // TODO: display search results
@@ -124,15 +147,64 @@ public class MainScreenController implements Initializable {
 
     @FXML
     private void deletePartHandler(ActionEvent event) {
+        try{
+            Part selectedPart = tablePartsList.getSelectionModel().getSelectedItem();
+            // confirmation alert format from https://code.makery.ch/blog/javafx-dialogs-official/
+            Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+            confirmAlert.setTitle("Delete Part confirmation");
+            confirmAlert.setHeaderText("Deleting a Part will remove it completely!");
+            confirmAlert.setContentText("Are you sure you want to delete " + selectedPart.getName() + "?");
+
+            Optional<ButtonType> response = confirmAlert.showAndWait();
+            if(response.get() == ButtonType.OK){
+                Inventory.deletePart(selectedPart);
+                tablePartsList.refresh();
+            }
+        }catch(NullPointerException e){
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error in Part Deletion");
+            errorAlert.setHeaderText("No Part Selected to delete");
+            errorAlert.setContentText("You must click on and select a part to delete.");
+
+            Optional<ButtonType> response = errorAlert.showAndWait();
+                if(response.get() == ButtonType.OK){
+                   // do nothing
+
+            }
+        }
+        
+        
     }
 
     @FXML
     private void modifyPartHandler(ActionEvent event) throws IOException {
-        
-        stage = (Stage)((Button)event.getSource()).getScene().getWindow();
-        scene = FXMLLoader.load(getClass().getResource("/View/ModifyPart.fxml"));
-        stage.setScene(new Scene(scene));
-        stage.show();
+        try{
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/View/ModifyPart.fxml"));
+            loader.load();
+
+            ModifyPartController MPCController = loader.getController();
+            MPCController.setPartToModify(tablePartsList.getSelectionModel().getSelectedItem());
+
+
+
+            stage = (Stage)((Button)event.getSource()).getScene().getWindow();
+            Parent scene = loader.getRoot();
+            stage.setScene(new Scene(scene));
+            stage.show();
+        }catch(NullPointerException e){
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error in Part Selection");
+            errorAlert.setHeaderText("No Part Selected to modify");
+            errorAlert.setContentText("You must click on and select a part to modify.");
+
+            Optional<ButtonType> response = errorAlert.showAndWait();
+                if(response.get() == ButtonType.OK){
+                   // do nothing
+
+            }
+        }
+     
         
     }
 
@@ -181,6 +253,32 @@ public class MainScreenController implements Initializable {
 
     @FXML
     private void deleteProductHandler(ActionEvent event) {
+        
+        try{
+            Product selectedProduct = tableProductsList.getSelectionModel().getSelectedItem();
+            // confirmation alert format from https://code.makery.ch/blog/javafx-dialogs-official/
+            Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+            confirmAlert.setTitle("Delete Product confirmation");
+            confirmAlert.setHeaderText("Deleting a Product will remove it completely!");
+            confirmAlert.setContentText("Are you sure you want to delete " + selectedProduct.getName() + "?");
+
+            Optional<ButtonType> response = confirmAlert.showAndWait();
+            if(response.get() == ButtonType.OK){
+                Inventory.deleteProduct(selectedProduct);
+                tablePartsList.refresh();
+            }
+        }catch(NullPointerException e){
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error in Product Deletion");
+            errorAlert.setHeaderText("No Product Selected to delete");
+            errorAlert.setContentText("You must click on and select a product to delete.");
+
+            Optional<ButtonType> response = errorAlert.showAndWait();
+                if(response.get() == ButtonType.OK){
+                   // do nothing
+
+            }
+        }
     }
 
     @FXML

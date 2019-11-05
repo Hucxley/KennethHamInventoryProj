@@ -115,8 +115,9 @@ public class AddPartController implements Initializable {
     @FXML
     private void btnActionSave(ActionEvent event) throws IOException {
         Part part;
-        // TODO: save entry
-        int partID = Inventory.getAllParts().size() + 1; // ensure part number minimum value is 1
+        int lastPartIndex = Inventory.getAllParts().size() - 1; // convert to index
+        int lastPartId = Inventory.getAllParts().get(lastPartIndex).getId();
+        int partID = lastPartId + 1; // ensure part number minimum value is 1
         String partName = this.getTxtName();
         double partPrice = this.getTxtPrice();
         int partStock = this.getTxtInv();
@@ -137,8 +138,6 @@ public class AddPartController implements Initializable {
             Inventory.addPart(part);
         }
         
-        System.out.println("Part added");
-        System.out.println(part);
         
         // Load Main Screen on save
         
@@ -149,7 +148,7 @@ public class AddPartController implements Initializable {
     }
     
     private void initStateToggleSource(){
-        System.out.println("initStatePartSource called");
+     
         if(Objects.equals(this.showMachineID, this.showCompanyName)){
             System.out.println("there's a problem, in-house & outsourced are the same!");
         }else{
@@ -157,7 +156,7 @@ public class AddPartController implements Initializable {
         }
         
     }
-    
+    //  HELPER Method to show/hide MachineId/CompanyName input fields when radio buttons toggled
     private void toggleInternalExternalFields(){
 
         if(this.showMachineID){

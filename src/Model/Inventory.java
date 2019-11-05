@@ -5,6 +5,7 @@
  */
 package Model;
 
+import java.util.Optional;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -30,12 +31,21 @@ public class Inventory {
     }
     
     public static Part lookupPart(int partId){ // TODO: change void to Part
-        return allParts.get(partId - 1); // convert to 0-based index
+        ObservableList<Part> parts = Inventory.allParts;
+        Part foundPart = null;
+        for(Part part : parts){
+            if(part.getId() == partId){
+                foundPart = part;
+            }
+        }
+        
+        return foundPart;
+        
         
     }
     
     public static Product lookupProduct(int productID){ // TODO: change void to Product
-        return allProducts.get(productID - 1); // convert to 0-based index
+        return allProducts.get(productID); // convert to 0-based index
         
     }
     
@@ -49,7 +59,9 @@ public class Inventory {
     }
     
     public static void updatePart(int index, Part selectedPart){
-        
+        Integer partIndex = index; // convert to zero-based index
+        allParts.set(partIndex, selectedPart);
+                
     }
     
     public static void updateProduct(int index, Product selectedProduct){
@@ -57,10 +69,17 @@ public class Inventory {
     }
     
     public static void deletePart(Part selectedPart){
+        Integer partIndex = allParts.indexOf(selectedPart); // set index to zero-based index
+        allParts.remove(selectedPart);
+        System.out.println(allParts.size());
+        
         
     }
     
     public static void deleteProduct(Product selectedProduct){
+        Integer productIndex = allProducts.indexOf(selectedProduct); // set index to zero-based index
+        allProducts.remove(selectedProduct);
+        System.out.println(allProducts.size());
         
     }
     
