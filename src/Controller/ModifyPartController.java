@@ -159,39 +159,37 @@ public class ModifyPartController implements Initializable {
             try{
                 ((InHouse) partToUpdate).setMachineId(Integer.parseInt(txtMachineID.getText()));
             }catch(ClassCastException e){
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("Error in Part Update");
-                errorAlert.setHeaderText("Part Source Can Not Be Changed");
-                errorAlert.setContentText("To change a part's source, a new entry must be completed for the new part source and the old part source must be deleted.");
+                Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                confirmAlert.setTitle("Part Source Change Request");
+                confirmAlert.setHeaderText("Changing the cannot be reversed!");
+                confirmAlert.setContentText("Are you sure you want to convert this part's source to be In-house?");
 
-                Optional<ButtonType> response = errorAlert.showAndWait();
-                    if(response.get() == ButtonType.OK){
-                       // do nothing
-
+                Optional<ButtonType> response = confirmAlert.showAndWait();
+                if(response.get() == ButtonType.OK){
+                    Part oldPart = partToUpdate;
+                    InHouse partInHouse = new InHouse(oldPart.getId(), oldPart.getName(), oldPart.getPrice(), oldPart.getStock(), oldPart.getMin(), oldPart.getMax(), Integer.parseInt(txtMachineID.getText()));
+                    Inventory.updatePart(partIndex, partInHouse);
                 }
             }            
-        }
-        if(this.showCompanyName){
+        }else if(this.showCompanyName){
             try{
                 ((Outsourced) partToUpdate).setCompanyName(txtCompanyName.getText());
             }catch(ClassCastException e){
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("Error in Part Update");
-                errorAlert.setHeaderText("Part Source Can Not Be Changed");
-                errorAlert.setContentText("To change a part's source, a new entry must be completed for the new part source and the old part source must be deleted.");
+                Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                confirmAlert.setTitle("Part Source Change Request");
+                confirmAlert.setHeaderText("Changing the cannot be reversed!");
+                confirmAlert.setContentText("Are you sure you want to convert this part's source to be Outsourced?");
 
-                Optional<ButtonType> response = errorAlert.showAndWait();
+                Optional<ButtonType> response = confirmAlert.showAndWait();
                     if(response.get() == ButtonType.OK){
-                       // do nothing
-
-                }
+                        Part oldPart = partToUpdate;
+                        Outsourced partOutsourced = new Outsourced(oldPart.getId(), oldPart.getName(), oldPart.getPrice(), oldPart.getStock(), oldPart.getMin(), oldPart.getMax(), txtCompanyName.getText());
+                        Inventory.updatePart(partIndex, partOutsourced);
+                    }
             }  
+        } else {
+            Inventory.updatePart(partIndex, partToUpdate);
         }
-        
-        
-        Inventory.updatePart(partIndex, partToUpdate);
-        
-        
                       
         // Load Main Screen on save
         
