@@ -49,7 +49,16 @@ public class Inventory {
         
     }
     
-    public static void lookupPart(String partName){ // TODO: change void to ObsservableList<Part>
+    public static ObservableList<Part> lookupPart(String partName){ // TODO: change void to ObsservableList<Part>
+        ObservableList<Part> searchResults = FXCollections.observableArrayList();
+        ObservableList<Part> parts = Inventory.allParts;
+        for(Part part : parts){
+            if(part.getName().contains(partName)){
+                searchResults.add(part);
+            }
+        }
+        
+        return searchResults;
         
         
     }

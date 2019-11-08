@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
+import static javafx.collections.FXCollections.observableArrayList;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -117,18 +119,22 @@ public class MainScreenController implements Initializable {
         
         String searchText;
         searchText = txtPartSearch.getText();
+        ObservableList<Part> searchResults = FXCollections.observableArrayList();
         
         // Regex pattern for matches from Stack Overflow user tokhi
         // URL to source: https://stackoverflow.com/a/39531087
         Boolean isNumber = searchText.matches("^[0-9]*$");
-        // If searchText is a number, search parts by index
-        if(isNumber){
+        
+        if(searchText.length() == 0){
+            tablePartsList.setItems(Inventory.getAllParts());
+        } else if(isNumber) { // If searchText is a number, search parts by index
             int partId = Integer.parseInt(txtPartSearch.getText());
             
             // Ensure partId is not 0 and is not greater than length of parts list
             if(partId != 0 && partId <= Inventory.getAllParts().size()){
 
                 Part foundPart = Inventory.lookupPart(partId);
+                searchResults.add(foundPart);
                 
                 // TODO: display search results
                 
@@ -140,8 +146,11 @@ public class MainScreenController implements Initializable {
                 System.out.println("TODO; Dialog for invalid part ID");
             }
         } else { // if searchText is not a numbger, search parts list with string
-            System.out.println(txtPartSearch.getText());
+            ObservableList foundParts = Inventory.lookupPart(searchText);
+            searchResults.setAll(foundParts);
         }
+        
+        tablePartsList.setItems(searchResults);
     
     }
 
@@ -171,9 +180,7 @@ public class MainScreenController implements Initializable {
                    // do nothing
 
             }
-        }
-        
-        
+        }   
     }
 
     @FXML
