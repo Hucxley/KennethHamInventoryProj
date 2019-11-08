@@ -78,8 +78,8 @@ public class AddPartController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-    showMachineID = this.radBtnInHouse.isSelected();
-    showCompanyName = this.radBtnOutsourced.isSelected();
+    this.showMachineID = this.radBtnInHouse.isSelected();
+    this.showCompanyName = this.radBtnOutsourced.isSelected();
 
     
         initStateToggleSource();
@@ -164,15 +164,13 @@ public class AddPartController implements Initializable {
             this.txtMachineID.setMaxHeight(31);
             this.labelCompanyName.setMaxHeight(0);
             this.txtCompanyName.setMaxHeight(0);
-            this.showMachineID = true;
-            this.showCompanyName = false;
+            this.showCompanyName = !this.showMachineID;
         }else{
             this.labelMachineID.setMaxHeight(0);
             this.txtMachineID.setMaxHeight(0);
             this.labelCompanyName.setMaxHeight(21);
             this.txtCompanyName.setMaxHeight(31);
-            this.showMachineID = false;
-            this.showCompanyName = true;
+            this.showMachineID = !this.showCompanyName;
         }
         
     }
