@@ -31,7 +31,7 @@ public class Inventory {
     }
     
     public static Part lookupPart(int partId){ // TODO: change void to Part
-        ObservableList<Part> parts = Inventory.allParts;
+        ObservableList<Part> parts = Inventory.getAllParts();
         Part foundPart = null;
         for(Part part : parts){
             if(part.getId() == partId){
@@ -39,19 +39,13 @@ public class Inventory {
             }
         }
         
-        return foundPart;
-        
-        
-    }
-    
-    public static Product lookupProduct(int productID){ // TODO: change void to Product
-        return allProducts.get(productID); // convert to 0-based index
+        return foundPart;  
         
     }
-    
-    public static ObservableList<Part> lookupPart(String partName){ // TODO: change void to ObsservableList<Part>
+        
+    public static ObservableList<Part> lookupPart(String partName){
         ObservableList<Part> searchResults = FXCollections.observableArrayList();
-        ObservableList<Part> parts = Inventory.allParts;
+        ObservableList<Part> parts = Inventory.getAllParts();
         for(Part part : parts){
             if(part.getName().contains(partName)){
                 searchResults.add(part);
@@ -59,37 +53,50 @@ public class Inventory {
         }
         
         return searchResults;
-        
-        
+      
     }
     
-    public static void lookupProuct(String productName){ // TODO: change void to ObservableList<Product>
+    public static Product lookupProduct(int productID){
+        ObservableList<Product> products = Inventory.getAllProducts();
+        Product foundProduct = null;
+        for(Product product : products){
+            if(product.getId() == productID){
+                foundProduct = product;
+            }
+        }
+        
+        return foundProduct;    
+    }
+    
+    public static ObservableList<Product> lookupProduct(String productName){ // TODO: change void to ObservableList<Product>
+        ObservableList<Product> searchResults = FXCollections.observableArrayList();
+        ObservableList<Product> products = Inventory.getAllProducts();
+        for(Product product : products){
+            if(product.getName().contains(productName)){
+                searchResults.add(product);
+            }
+        }
+        
+        return searchResults;
         
     }
     
     public static void updatePart(int index, Part selectedPart){
-        Integer partIndex = index; // convert to zero-based index
-        allParts.set(partIndex, selectedPart);
-                
+        Integer partIndex = index;
+        allParts.set(partIndex, selectedPart);           
     }
     
     public static void updateProduct(int index, Product selectedProduct){
-        
+        Integer productIndex = index;
+        allProducts.set(productIndex, selectedProduct);   
     }
     
     public static void deletePart(Part selectedPart){
-        Integer partIndex = allParts.indexOf(selectedPart); // set index to zero-based index
-        allParts.remove(selectedPart);
-        System.out.println(allParts.size());
-        
-        
+        allParts.remove(selectedPart); 
     }
     
     public static void deleteProduct(Product selectedProduct){
-        Integer productIndex = allProducts.indexOf(selectedProduct); // set index to zero-based index
-        allProducts.remove(selectedProduct);
-        System.out.println(allProducts.size());
-        
+        allProducts.remove(selectedProduct);     
     }
     
     public static ObservableList<Part> getAllParts(){

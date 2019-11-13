@@ -40,7 +40,6 @@ public class KennethHamInventoryProj extends Application {
         productParts.add(partA);
         productParts.add(partB);
         productParts.add(partC);
-        productParts.add(partD);
         
         Product productA = new Product(productParts, 1, "Product A", 10.00, 10, 1, 100);
         

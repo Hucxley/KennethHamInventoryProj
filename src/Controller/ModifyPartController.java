@@ -11,6 +11,7 @@ import Model.Outsourced;
 import Model.Part;
 import java.io.IOException;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -136,11 +137,20 @@ public class ModifyPartController implements Initializable {
 
     @FXML
     private void btnActionCancel(ActionEvent event) throws IOException {
-        
-        stage = (Stage)((Button)event.getSource()).getScene().getWindow();
-        scene = FXMLLoader.load(getClass().getResource("/View/MainScreen.fxml"));
-        stage.setScene(new Scene(scene));
-        stage.show();
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to cancel?", ButtonType.YES, ButtonType.NO);
+            confirmAlert.setTitle("Confirm Cancel");
+            confirmAlert.setHeaderText("Changes will be lost if cancelled without saving");
+
+            Optional<ButtonType> response = confirmAlert.showAndWait();
+            if(response.isPresent() && response.get() == ButtonType.YES){
+                stage = (Stage)((Button)event.getSource()).getScene().getWindow();
+                scene = FXMLLoader.load(getClass().getResource("/View/MainScreen.fxml"));
+                stage.setScene(new Scene(scene));
+                stage.show();
+            }else{
+                confirmAlert.hide();
+            }
+
     }
 
     @FXML
@@ -157,87 +167,110 @@ public class ModifyPartController implements Initializable {
         partToUpdate.setName(txtName.getText());
         partToUpdate.setStock(Integer.parseInt(txtInv.getText()));
         partToUpdate.setPrice(Double.parseDouble(txtPrice.getText()));
-        
-        if(this.showMachineID){
-            if(this.txtMachineID.getText().trim().length() > 0){
-                try{
-                    ((InHouse) partToUpdate).setMachineId(Integer.parseInt(txtMachineID.getText()));
-                    Inventory.updatePart(partIndex, partToUpdate);
-                    saveComplete = true;
-                }catch(ClassCastException e){
-                    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirmAlert.setTitle("Part Source Change Request");
-                    confirmAlert.setHeaderText("Changing the part source cannot be reversed!");
-                    confirmAlert.setContentText("Are you sure you want to convert this part's source to be In-house?");
+        if(partToUpdate.getMin() > partToUpdate.getMax()){
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Min/Max Inventory Error");
+            errorAlert.setHeaderText("Min Count is greater than Max Count");
+            errorAlert.setContentText("Min Part Count MUST be LESS than Max Part Count");
 
-                    Optional<ButtonType> response = confirmAlert.showAndWait();
-                    if(response.get() == ButtonType.OK){
-                        Part oldPart = partToUpdate;
-                        InHouse partInHouse = new InHouse(oldPart.getId(), oldPart.getName(), oldPart.getPrice(), oldPart.getStock(), oldPart.getMin(), oldPart.getMax(), Integer.parseInt(txtMachineID.getText()));
-                        Inventory.updatePart(partIndex, partInHouse);
+            Optional<ButtonType> response = errorAlert.showAndWait();
+                if(response.get() == ButtonType.OK){
+                   // do nothing
+
+            }
+        }else if(partToUpdate.getMax() < partToUpdate.getMin()){
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Min/Max Inventory Error");
+            errorAlert.setHeaderText("Max Count is less than Min Count");
+            errorAlert.setContentText("Max Part Count MUST be MORE than Min Part Count");
+
+            Optional<ButtonType> response = errorAlert.showAndWait();
+                if(response.get() == ButtonType.OK){
+                   // do nothing
+
+            }
+        }else{
+            if(this.showMachineID){
+                if(this.txtMachineID.getText().trim().length() > 0){
+                    try{
+                        ((InHouse) partToUpdate).setMachineId(Integer.parseInt(txtMachineID.getText()));
+                        Inventory.updatePart(partIndex, partToUpdate);
                         saveComplete = true;
-                    }else{
-                        confirmAlert.hide();
-                    }
-                }
-            } else {
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("Error Saving Part!");
-                errorAlert.setHeaderText("Machine ID is Required");
-                errorAlert.setContentText("Enter a Machine ID to finish modifying this part.");
-                
-                errorAlert.setOnCloseRequest((DialogEvent dialogEvent) -> {
-                    this.txtMachineID.clear();
-                    this.txtMachineID.requestFocus();
-                });
-                errorAlert.showAndWait();
-                
-            }            
-        }else if(this.showCompanyName){
-            if(this.txtCompanyName.getText().trim().length() > 0){
-                try{
-                    ((Outsourced) partToUpdate).setCompanyName(txtCompanyName.getText());
-                    Inventory.updatePart(partIndex, partToUpdate);
-                    saveComplete = true;
-                }catch(ClassCastException e){
-                    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirmAlert.setTitle("Part Source Change Request");
-                    confirmAlert.setHeaderText("Changing the part source cannot be reversed!");
-                    confirmAlert.setContentText("Are you sure you want to convert this part's source to be Outsourced?");
+                    }catch(ClassCastException e){
+                        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                        confirmAlert.setTitle("Part Source Change Request");
+                        confirmAlert.setHeaderText("Changing the part source cannot be reversed!");
+                        confirmAlert.setContentText("Are you sure you want to convert this part's source to be In-house?");
 
-                    Optional<ButtonType> response = confirmAlert.showAndWait();
+                        Optional<ButtonType> response = confirmAlert.showAndWait();
                         if(response.get() == ButtonType.OK){
                             Part oldPart = partToUpdate;
-                            Outsourced partOutsourced = new Outsourced(oldPart.getId(), oldPart.getName(), oldPart.getPrice(), oldPart.getStock(), oldPart.getMin(), oldPart.getMax(), txtCompanyName.getText());
-                            Inventory.updatePart(partIndex, partOutsourced);
+                            InHouse partInHouse = new InHouse(oldPart.getId(), oldPart.getName(), oldPart.getPrice(), oldPart.getStock(), oldPart.getMin(), oldPart.getMax(), Integer.parseInt(txtMachineID.getText()));
+                            Inventory.updatePart(partIndex, partInHouse);
                             saveComplete = true;
                         }else{
                             confirmAlert.hide();
                         }
+                    }
+                } else {
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("Error Saving Part!");
+                    errorAlert.setHeaderText("Machine ID is Required");
+                    errorAlert.setContentText("Enter a Machine ID to finish modifying this part.");
+
+                    errorAlert.setOnCloseRequest((DialogEvent dialogEvent) -> {
+                        this.txtMachineID.clear();
+                        this.txtMachineID.requestFocus();
+                    });
+                    errorAlert.showAndWait();
+
+                }            
+            }else if(this.showCompanyName){
+                if(this.txtCompanyName.getText().trim().length() > 0){
+                    try{
+                        ((Outsourced) partToUpdate).setCompanyName(txtCompanyName.getText());
+                        Inventory.updatePart(partIndex, partToUpdate);
+                        saveComplete = true;
+                    }catch(ClassCastException e){
+                        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                        confirmAlert.setTitle("Part Source Change Request");
+                        confirmAlert.setHeaderText("Changing the part source cannot be reversed!");
+                        confirmAlert.setContentText("Are you sure you want to convert this part's source to be Outsourced?");
+
+                        Optional<ButtonType> response = confirmAlert.showAndWait();
+                            if(response.get() == ButtonType.OK){
+                                Part oldPart = partToUpdate;
+                                Outsourced partOutsourced = new Outsourced(oldPart.getId(), oldPart.getName(), oldPart.getPrice(), oldPart.getStock(), oldPart.getMin(), oldPart.getMax(), txtCompanyName.getText());
+                                Inventory.updatePart(partIndex, partOutsourced);
+                                saveComplete = true;
+                            }else{
+                                confirmAlert.hide();
+                            }
+                    }
+                } else {
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("Error Saving Part!");
+                    errorAlert.setHeaderText("Company Name is Required");
+                    errorAlert.setContentText("Enter the Company Name to change the part type this part.");
+
+                    errorAlert.setOnCloseRequest((DialogEvent dialogEvent) -> {
+                        this.txtCompanyName.clear();
+                        this.txtCompanyName.requestFocus();
+                    });
+                    errorAlert.showAndWait();
+
                 }
             } else {
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("Error Saving Part!");
-                errorAlert.setHeaderText("Company Name is Required");
-                errorAlert.setContentText("Enter the Company Name to change the part type this part.");
-                
-                errorAlert.setOnCloseRequest((DialogEvent dialogEvent) -> {
-                    this.txtCompanyName.clear();
-                    this.txtCompanyName.requestFocus();
-                });
-                errorAlert.showAndWait();
-
+                System.out.println("Something bad happened, tthis shouldn't happen");
             }
-        } else {
-            System.out.println("Something bad happened, tthis shouldn't happen");
-        }
-                      
-        // Load Main Screen on save
-        if(saveComplete){
-            stage = (Stage)((Button)event.getSource()).getScene().getWindow();
-            scene = FXMLLoader.load(getClass().getResource("/View/MainScreen.fxml"));
-            stage.setScene(new Scene(scene));
-            stage.show();
+
+            // Load Main Screen on save
+            if(saveComplete){
+                stage = (Stage)((Button)event.getSource()).getScene().getWindow();
+                scene = FXMLLoader.load(getClass().getResource("/View/MainScreen.fxml"));
+                stage.setScene(new Scene(scene));
+                stage.show();
+            }
         }
         
     }
@@ -267,17 +300,21 @@ public class ModifyPartController implements Initializable {
     private void toggleInternalExternalFields(){
 
         if(this.showMachineID){
+            this.txtMachineID.setDisable(false);
             this.labelMachineID.setMaxHeight(21);
             this.txtMachineID.setMaxHeight(31);
             this.labelCompanyName.setMaxHeight(0);
             this.txtCompanyName.setMaxHeight(0);
             this.showCompanyName = !this.showMachineID;
+            this.txtCompanyName.setDisable(true);
         }else{
+            this.txtCompanyName.setDisable(false);
             this.labelMachineID.setMaxHeight(0);
             this.txtMachineID.setMaxHeight(0);
             this.labelCompanyName.setMaxHeight(21);
             this.txtCompanyName.setMaxHeight(31);
             this.showMachineID = !this.showCompanyName;
+            this.txtMachineID.setDisable(true);
         }
         
     }

@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
@@ -13,7 +9,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="522.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MainScreenController">
+<AnchorPane id="AnchorPane" prefHeight="522.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MainScreenController">
    <children>
       <Label fx:id="lblMainLabel" layoutX="29.0" layoutY="32.0" text="Inventory Management System">
          <font>
@@ -28,7 +24,7 @@
                </font>
             </Label>
             <Button fx:id="btnSearchPart" layoutX="215.0" layoutY="24.0" mnemonicParsing="false" onAction="#searchPartHandler" text="Search" />
-            <TextField fx:id="txtPartSearch" layoutX="292.0" layoutY="21.0" prefHeight="31.0" prefWidth="195.0">
+            <TextField fx:id="txtPartSearch" layoutX="292.0" layoutY="24.0" prefHeight="31.0" prefWidth="195.0">
                <font>
                   <Font name="Calibri Light" size="15.0" />
                </font>
@@ -41,9 +37,9 @@
                   <TableColumn fx:id="colPartPrice" editable="false" prefWidth="103.0" text="Unit Price" />
               </columns>
             </TableView>
-            <Button fx:id="btnDeletePart" layoutX="422.0" layoutY="293.0" mnemonicParsing="false" onAction="#deletePartHandler" text="Delete" />
-            <Button fx:id="btnModifyPart" layoutX="342.0" layoutY="293.0" mnemonicParsing="false" onAction="#modifyPartHandler" text="Modify" />
             <Button fx:id="btnAddPart" layoutX="282.0" layoutY="293.0" mnemonicParsing="false" onAction="#addPartHandler" text="Add" />
+            <Button fx:id="btnModifyPart" layoutX="342.0" layoutY="293.0" mnemonicParsing="false" onAction="#modifyPartHandler" text="Modify" />
+            <Button fx:id="btnDeletePart" layoutX="422.0" layoutY="293.0" mnemonicParsing="false" onAction="#deletePartHandler" text="Delete" />
          </children>
       </Pane>
       <Pane layoutX="558.0" layoutY="82.0" prefHeight="341.0" prefWidth="511.0" style="-fx-border-color: black;">
@@ -54,7 +50,7 @@
                </font>
             </Label>
             <Button fx:id="btnSearchProduct" layoutX="216.0" layoutY="24.0" mnemonicParsing="false" onAction="#searchProductHandler" text="Search" />
-            <TextField fx:id="txtSearchProduct" layoutX="292.0" layoutY="21.0" prefHeight="31.0" prefWidth="195.0">
+            <TextField fx:id="txtSearchProduct" layoutX="292.0" layoutY="24.0" prefHeight="31.0" prefWidth="195.0">
                <font>
                   <Font name="Calibri Light" size="15.0" />
                </font>
@@ -67,9 +63,9 @@
                   <TableColumn fx:id="colProductPrice" editable="false" prefWidth="103.0" text="Unit Price" />
                </columns>
             </TableView>
-            <Button fx:id="btnDeleteProduct" layoutX="422.0" layoutY="293.0" mnemonicParsing="false" onAction="#deleteProductHandler" text="Delete" />
-            <Button fx:id="btnModifyProduct" layoutX="342.0" layoutY="293.0" mnemonicParsing="false" onAction="#modifyProductHandler" text="Modify" />
             <Button fx:id="btnAddProduct" layoutX="282.0" layoutY="293.0" mnemonicParsing="false" onAction="#addProductHandler" text="Add" />
+            <Button fx:id="btnModifyProduct" layoutX="342.0" layoutY="293.0" mnemonicParsing="false" onAction="#modifyProductHandler" text="Modify" />
+            <Button fx:id="btnDeleteProduct" layoutX="422.0" layoutY="293.0" mnemonicParsing="false" onAction="#deleteProductHandler" text="Delete" />
          </children>
       </Pane>
       <Button fx:id="btnExit" layoutX="1017.0" layoutY="453.0" mnemonicParsing="false" onAction="#exitMainHandler" text="Exit">

@@ -10,6 +10,7 @@ import Model.Part;
 import Model.Product;
 import java.io.IOException;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -26,6 +27,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -106,19 +108,49 @@ public class MainScreenController implements Initializable {
         colPartCount.setCellValueFactory(new PropertyValueFactory<>("stock"));
         colPartPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
         
+        /** number format cell factory example used from StackOverflow user James_D 
+         *  Direct URL https://stackoverflow.com/a/48733179
+         */
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+        colPartPrice.setCellFactory(tc -> new TableCell<Part, Double>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(currencyFormat.format(price));
+                }
+            }
+        });
+        
         tableProductsList.setItems(Inventory.getAllProducts());
         colProductId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colProductName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colProductCount.setCellValueFactory(new PropertyValueFactory<>("stock"));
         colProductPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
         
+        /** number format cell factory example used from StackOverflow user James_D 
+         *  Direct URL https://stackoverflow.com/a/48733179
+         */
+        colProductPrice.setCellFactory(tc -> new TableCell<Product, Double>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(currencyFormat.format(price));
+                }
+            }
+        });        
     }    
 
     @FXML
     private void searchPartHandler(ActionEvent event) {
         
         String searchText;
-        searchText = txtPartSearch.getText();
+        searchText = txtPartSearch.getText().trim();
         ObservableList<Part> searchResults = FXCollections.observableArrayList();
         
         // Regex pattern for matches from Stack Overflow user tokhi
@@ -126,7 +158,8 @@ public class MainScreenController implements Initializable {
         Boolean isNumber = searchText.matches("^[0-9]*$");
         
         if(searchText.length() == 0){
-            tablePartsList.setItems(Inventory.getAllParts());
+            txtPartSearch.clear();
+            searchResults = Inventory.getAllParts();
         } else if(isNumber) { // If searchText is a number, search parts by index
             int partId = Integer.parseInt(txtPartSearch.getText());
             
@@ -136,14 +169,11 @@ public class MainScreenController implements Initializable {
                 Part foundPart = Inventory.lookupPart(partId);
                 searchResults.add(foundPart);
                 
-                // TODO: display search results
                 
                 System.out.println(foundPart);
-            } else {  // notify user to enter valid part ID
-                
-                // TODO: create notifcation / dialogue for invalid part ID
-                
-                System.out.println("TODO; Dialog for invalid part ID");
+            } else {                
+                searchResults.clear(); // ensure search results are clear for invalid ID
+
             }
         } else { // if searchText is not a numbger, search parts list with string
             ObservableList foundParts = Inventory.lookupPart(searchText);
@@ -159,16 +189,18 @@ public class MainScreenController implements Initializable {
         try{
             Part selectedPart = tablePartsList.getSelectionModel().getSelectedItem();
             // confirmation alert format from https://code.makery.ch/blog/javafx-dialogs-official/
-            Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
-            confirmAlert.setTitle("Delete Part confirmation");
-            confirmAlert.setHeaderText("Deleting a Part will remove it completely!");
-            confirmAlert.setContentText("Are you sure you want to delete " + selectedPart.getName() + "?");
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete " + selectedPart.getName() + "?", ButtonType.YES, ButtonType.NO);
+            confirmAlert.setTitle("Confirm Part Deletioon");
+            confirmAlert.setHeaderText("Deleted items CANNOT be recovered!");
 
             Optional<ButtonType> response = confirmAlert.showAndWait();
-            if(response.get() == ButtonType.OK){
-                Inventory.deletePart(selectedPart);
-                tablePartsList.refresh();
-            }
+            if(response.isPresent() && response.get() == ButtonType.YES){
+                    Inventory.deletePart(selectedPart);
+                    tablePartsList.refresh();
+            }else{
+                confirmAlert.hide();
+            } 
+ 
         }catch(NullPointerException e){
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Error in Part Deletion");
@@ -193,8 +225,6 @@ public class MainScreenController implements Initializable {
             ModifyPartController MPCController = loader.getController();
             MPCController.setPartToModify(tablePartsList.getSelectionModel().getSelectedItem());
 
-
-
             stage = (Stage)((Button)event.getSource()).getScene().getWindow();
             Parent scene = loader.getRoot();
             stage.setScene(new Scene(scene));
@@ -210,8 +240,7 @@ public class MainScreenController implements Initializable {
                    // do nothing
 
             }
-        }
-     
+        } 
         
     }
 
@@ -229,33 +258,44 @@ public class MainScreenController implements Initializable {
     private void searchProductHandler(ActionEvent event) {
         
         String searchText;
-        searchText = txtSearchProduct.getText();
+        searchText = txtSearchProduct.getText().trim();
+        ObservableList<Product> searchResults = FXCollections.observableArrayList();
+        Product foundProduct = null;
+        ObservableList<Product> foundProducts = FXCollections.observableArrayList();
         
-        // Regex pattern for matches from Stack Overflow user tokhi
-        // URL to source: https://stackoverflow.com/a/39531087
-        Boolean isNumber = searchText.matches("^[0-9]*$");
-        // If searchText is a number, search parts by index
-        if(isNumber){
-            int productId = Integer.parseInt(searchText);
-            
-            // Ensure partId is not 0 and is not greater than length of parts list
-            if(productId != 0 && productId <= Inventory.getAllProducts().size()){
-                Product foundProduct = Inventory.lookupProduct(productId);
-                
-                // TODO: display search results
-                
-                System.out.println(foundProduct);
-            } else {  // notify user to enter valid part ID
-                
-                // TODO: create notifcation / dialogue for invalid part ID
-                
-                System.out.println("TODO; Dialog for invalid part ID");
-            }
-        } else { // if searchText is not a numbger, search parts list with string
-            System.out.println(txtPartSearch.getText());
-        }
         
+        if(searchText.length() == 0){
+            txtSearchProduct.clear();
+            searchResults = Inventory.getAllProducts();
+        }else{
+            // Regex pattern for matches from Stack Overflow user tokhi
+            // URL to source: https://stackoverflow.com/a/39531087
+            Boolean isNumber = searchText.matches("^[0-9]*$");
+            // If searchText is a number, search parts by index
+            if(isNumber){
+                int productId = Integer.parseInt(searchText);
 
+                // Ensure partId is not 0 and is not greater than length of parts list
+                if(productId != 0 && productId <= Inventory.getAllProducts().size()){
+                    foundProduct = Inventory.lookupProduct(productId);
+
+                    // insert found product to Search results
+                    searchResults.add(foundProduct);
+
+                } else {  // notify user to enter valid part ID
+
+                    searchResults.clear();  // ensure search results is empty if non-valid ID entered
+
+                    System.out.println("TODO; Dialog for invalid part ID");
+                }
+            } else { // if searchText is not a numbger, search parts list with string
+                foundProducts = Inventory.lookupProduct(searchText);
+                searchResults.setAll(foundProducts);
+                System.out.println(txtPartSearch.getText());
+            }
+        }
+        // display search results
+        tableProductsList.setItems(searchResults);
     }
 
     @FXML
@@ -264,13 +304,13 @@ public class MainScreenController implements Initializable {
         try{
             Product selectedProduct = tableProductsList.getSelectionModel().getSelectedItem();
             // confirmation alert format from https://code.makery.ch/blog/javafx-dialogs-official/
-            Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+            
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete " + selectedProduct.getName() + "?", ButtonType.YES, ButtonType.NO);
             confirmAlert.setTitle("Delete Product confirmation");
             confirmAlert.setHeaderText("Deleting a Product will remove it completely!");
-            confirmAlert.setContentText("Are you sure you want to delete " + selectedProduct.getName() + "?");
 
             Optional<ButtonType> response = confirmAlert.showAndWait();
-            if(response.get() == ButtonType.OK){
+            if(response.isPresent() && response.get() == ButtonType.YES){
                 Inventory.deleteProduct(selectedProduct);
                 tablePartsList.refresh();
             }
@@ -291,11 +331,31 @@ public class MainScreenController implements Initializable {
     @FXML
     private void modifyProductHandler(ActionEvent event) throws IOException {
         
-        stage = (Stage)((Button)event.getSource()).getScene().getWindow();
-        scene = FXMLLoader.load(getClass().getResource("/View/ModifyProduct.fxml"));
-        stage.setScene(new Scene(scene));
-        stage.show();
-        
+        try{
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/View/ModifyProduct.fxml"));
+            loader.load();
+
+            ModifyProductController MPCController = loader.getController();
+            MPCController.setProductToModify(tableProductsList.getSelectionModel().getSelectedItem());
+
+            stage = (Stage)((Button)event.getSource()).getScene().getWindow();
+            Parent scene = loader.getRoot();
+            stage.setScene(new Scene(scene));
+            stage.show();
+        }catch(NullPointerException e){
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error in Product Selection");
+            errorAlert.setHeaderText("No Product Selected to modify");
+            errorAlert.setContentText("You must click on and select a product to modify.");
+
+            Optional<ButtonType> response = errorAlert.showAndWait();
+                if(response.get() == ButtonType.OK){
+                   // do nothing
+
+            }
+        }
+                
     }
 
     @FXML

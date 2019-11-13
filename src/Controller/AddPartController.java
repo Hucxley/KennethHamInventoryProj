@@ -12,6 +12,7 @@ import Model.Part;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,7 +20,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
@@ -103,12 +106,19 @@ public class AddPartController implements Initializable {
 
     @FXML
     private void btnActionCancel(ActionEvent event) throws IOException {
-        
-        stage = (Stage)((Button)event.getSource()).getScene().getWindow();
-        scene = FXMLLoader.load(getClass().getResource("/View/MainScreen.fxml"));
-        stage.setScene(new Scene(scene));
-        stage.show();
-        
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to cancel?", ButtonType.YES, ButtonType.NO);
+        confirmAlert.setTitle("Confirm Cancel");
+        confirmAlert.setHeaderText("Changes will be lost if cancelled without saving");
+
+        Optional<ButtonType> response = confirmAlert.showAndWait();
+        if(response.isPresent() && response.get() == ButtonType.YES){
+            stage = (Stage)((Button)event.getSource()).getScene().getWindow();
+            scene = FXMLLoader.load(getClass().getResource("/View/MainScreen.fxml"));
+            stage.setScene(new Scene(scene));
+            stage.show();
+        }else{
+            confirmAlert.hide();
+        }       
         
     }
 
@@ -125,17 +135,42 @@ public class AddPartController implements Initializable {
         int partMax = this.getTxtMax();
         String partCompanyName = this.getTxtCompanyName();
         int partMachineID = this.getTxtMachineID();
-       
-        if(this.showMachineID){
-            part = new Outsourced(partID, partName, partPrice, partStock, partMin, partMax, partCompanyName);
-            
-            // add new Outsourced Part to Inventory
-            Inventory.addPart(part);
+        
+        if(partMin > partMax){
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Min/Max Inventory Error");
+            errorAlert.setHeaderText("Min Count is greater than Max Count");
+            errorAlert.setContentText("Min Part Count MUST be LESS than Max Part Count");
+
+            Optional<ButtonType> response = errorAlert.showAndWait();
+                if(response.get() == ButtonType.OK){
+                   // do nothing
+
+            }
+        }else if(partMax < partMin){
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Min/Max Inventory Error");
+            errorAlert.setHeaderText("Max Count is less than Min Count");
+            errorAlert.setContentText("Max Part Count MUST be MORE than Min Part Count");
+
+            Optional<ButtonType> response = errorAlert.showAndWait();
+                if(response.get() == ButtonType.OK){
+                   // do nothing
+
+            }
         }else{
-            part = new InHouse(partID, partName, partPrice, partStock, partMin, partMax, partMachineID);
-            
-            // add new InHouse Part to Inventory
-            Inventory.addPart(part);
+     
+            if(this.showMachineID){
+                part = new Outsourced(partID, partName, partPrice, partStock, partMin, partMax, partCompanyName);
+
+                // add new Outsourced Part to Inventory
+                Inventory.addPart(part);
+            }else{
+                part = new InHouse(partID, partName, partPrice, partStock, partMin, partMax, partMachineID);
+
+                // add new InHouse Part to Inventory
+                Inventory.addPart(part);
+            }
         }
         
         
@@ -160,17 +195,21 @@ public class AddPartController implements Initializable {
     private void toggleInternalExternalFields(){
 
         if(this.showMachineID){
+            this.txtMachineID.setDisable(false);
             this.labelMachineID.setMaxHeight(21);
             this.txtMachineID.setMaxHeight(31);
             this.labelCompanyName.setMaxHeight(0);
             this.txtCompanyName.setMaxHeight(0);
             this.showCompanyName = !this.showMachineID;
+            this.txtCompanyName.setDisable(true);
         }else{
+            this.txtCompanyName.setDisable(false);
             this.labelMachineID.setMaxHeight(0);
             this.txtMachineID.setMaxHeight(0);
             this.labelCompanyName.setMaxHeight(21);
             this.txtCompanyName.setMaxHeight(31);
             this.showMachineID = !this.showCompanyName;
+            this.txtMachineID.setDisable(true);
         }
         
     }
